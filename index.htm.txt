@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Group Voting Form</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f8ff;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease;
+    }
+    h2 {
+      text-align: center;
+      color: #007acc;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 20px;
+      display: block;
+    }
+    select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #005f99;
+    }
+    .output {
+      margin-top: 20px;
+      background: #e0ffe0;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Online Voting Form</h2>
+    <p><strong>Instructions:</strong> Select your name and vote for one candidate per position. You can only vote once. If your name has already been used, the form will be blocked.</p>
+
+    <form id="voteForm" action="https://formspree.io/f/xovdrgbp" method="POST">
+      <label for="voterName">Your Name:</label>
+      <select name="Voter Name" id="voterName" required>
+        <option value="">-- Select Your Name --</option>
+        <option>Maria Kimaro</option>
+        <option>Kelvin Sanga</option>
+        <option>Neema Temba</option>
+        <option>George Elias</option>
+        <option>Anna Peter</option>
+        <option>David Mushi</option>
+        <option>Sarah Maganga</option>
+        <option>John Bosco</option>
+        <option>Agnes Paulo</option>
+        <option>Peter Madebe</option>
+      </select>
+
+      <label for="chairperson">Chairperson (Choose 1):</label>
+      <select name="Chairperson" id="chairperson" required>
+        <option value="">-- Select Candidate --</option>
+        <option>Kelvin Sanga</option>
+        <option>Maria Kimaro</option>
+        <option>George Elias</option>
+      </select>
+
+      <label for="assistant">Assistant Chairperson (Choose 1):</label>
+      <select name="Assistant Chairperson" id="assistant" required>
+        <option value="">-- Select Candidate --</option>
+        <option>Neema Temba</option>
+        <option>John Bosco</option>
+        <option>Anna Peter</option>
+      </select>
+
+      <label for="secretary">Secretary (Choose 1):</label>
+      <select name="Secretary" id="secretary" required>
+        <option value="">-- Select Candidate --</option>
+        <option>Sarah Maganga</option>
+        <option>David Mushi</option>
+        <option>Agnes Paulo</option>
+      </select>
+
+      <button type="submit">Submit Vote</button>
+
+      <div class="output" id="thankYouBox"></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("voteForm");
+    const output = document.getElementById("thankYouBox");
+
+    // Check for duplicate voter
+    const votedName = localStorage.getItem("voted_name");
+    const voterNameDropdown = document.getElementById("voterName");
+
+    if (votedName) {
+      form.innerHTML = `<p style="color:red; font-weight:bold;">You already voted as <strong>${votedName}</strong>. You cannot vote twice.</p>`;
+    }
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const name = voterNameDropdown.value;
+      const chair = document.getElementById("chairperson").value;
+      const assistant = document.getElementById("assistant").value;
+      const secretary = document.getElementById("secretary").value;
+
+      // Validate no duplicates across positions
+      const selected = [chair, assistant, secretary];
+      const unique = new Set(selected);
+      if (unique.size < 3) {
+        alert("Each candidate can only be selected for one role. Please choose different people.");
+        return;
+      }
+
+      // Save to local storage
+      localStorage.setItem("voted_name", name);
+
+      // Show thank-you message
+      output.innerHTML = `
+        <h3>Thank You, ${name}!</h3>
+        <p>You have voted successfully. Here's a summary of your choices:</p>
+        <ul>
+          <li><strong>Chairperson:</strong> ${chair}</li>
+          <li><strong>Assistant Chairperson:</strong> ${assistant}</li>
+          <li><strong>Secretary:</strong> ${secretary}</li>
+        </ul>
+        <p>Your vote has been recorded.</p>
+      `;
+      output.style.display = "block";
+
+      // Actually submit the form to Formspree
+      form.submit();
+    });
+  </script>
+</body>
+</html>
